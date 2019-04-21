@@ -1,3 +1,9 @@
+#importation des donnees order book en format json_data
+#construction d'une dataframe
+#rajout des colonnes volume total style somme execl
+#rajout d'une colonne detection des walls
+#enregistrement des donnees traitees dans data_treated.JSON 
+
 import json
 import pandas as pd
 import numpy as np
