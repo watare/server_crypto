@@ -8,29 +8,34 @@ import json
 import pandas as pd
 import numpy as np
 
-with open('data_poloniex.json') as json_data:
-    data_dict = json.load(json_data)
+def dataquisition(data):
+    with open(data) as json_data:
+        data_dict = json.load(json_data)
 
-#transformation JSON en 2 dataframe
-    bids = data_dict['bids']
-    asks = data_dict['asks']
+    #transformation JSON en 2 dataframe
+        bids = data_dict['bids']
+        asks = data_dict['asks']
 
-    listbids = []
-    listasks = []
+        listbids = []
+        listasks = []
 
-    #transformation en dictionnaire
-    for bid in bids :
-        listbids.append({'value' : bid[0], 'bidsvolume' :bid[1]})
-    for ask in asks :
-        listasks.append({'value' : ask[0], 'asksvolume' :ask[1]})
+        #transformation en dictionnaire
+        for bid in bids :
+            listbids.append({'value' : bid[0], 'bidsvolume' :bid[1]})
+        for ask in asks :
+            listasks.append({'value' : ask[0], 'asksvolume' :ask[1]})
 
-    #ajout de la liste de dicitonnaire dans les dataframes
-    dfbids = pd.DataFrame(listbids)
-    dfasks = pd.DataFrame(listasks)
-#calcul du volume global et detection des walls
+        #ajout de la liste de dicitonnaire dans les dataframes
+        dfbids = pd.DataFrame(listbids)
+        dfasks = pd.DataFrame(listasks)
+        return [dfbids,dfasks]
+
+
+def calculVolumeGlobal (dfbids,dfasks):
+    #calcul du volume global et detection des walls
     dfbids['bidstotalvolume'] = dfbids['bidsvolume'].cumsum(axis = 0)
     dfasks['askstotalvolume'] = dfasks['asksvolume'].cumsum(axis = 0)
-#le 0.1 correspond a 10% du volume global
+    #le 0.1 correspond a 10% du volume global
     comparator = lambda x: 1000 if x>0.1 else 0
 
 
@@ -42,36 +47,60 @@ with open('data_poloniex.json') as json_data:
     dfbids['bidswall'] = dfbids['bidsvolume'].multiply(1/bidstotal)
     dfbids['bidswall'] = dfbids['bidswall'].apply(comparator)
 
-    #tendance
-    seuilvente = 0.40
-    seuilachat = 0.40
+    return [askstotal, bidstotal]
+#tendance
+    #achat/vente/nondefini
+def tendance (askstotal,bidstotal,seuilvente = 50,seuilachat = 50):
     total = askstotal + bidstotal
-    tendancevente = askstotal/total
-    tendanceachat =  bidstotal/total
+    pourcentagevente = int(askstotal/total*100)
+    pourcentageachat =  int(bidstotal/total*100)
 
-    if (tendancevente > seuilvente):
+    tendanceachat = False
+    tendancevente = False
+    tendancenondefinie = True
+
+    if pourcentagevente  > seuilvente :
         tendancevente = True
-    else : tendancevente = False
-
-    if (tendanceachat > seuilachat and tendancevente !=True):
-        tendanceachat = True
-    else :
         tendanceachat = False
+        tendancenondefinie = False
+
+    if pourcentageachat > seuilachat and tendancevente == False:
+        tendanceachat = True
         tendancevente = False
-        tendancenondefinie = True
+        tendancenondefinie = False
 
-    #print(total)
-    #print(tendancevente)
-    #print(tendanceachat)
-    #print(tendancenondefinie)
+    return [tendanceachat,tendancevente,tendancenondefinie]
 
-    #concatenation de bids et asks + reindexage
-    dfall = pd.concat([dfbids,dfasks],ignore_index=True,sort =True)
-    dfall = dfall.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
-    #print(dfall)
-    #suppression des walls
+#filtreBidsWall
+def filtreBidsWall(dfbids):
+    dfbids_filtre = dfbids.drop(dfbids[dfbids.bidswall == 1000].index)
+    return dfbids_filtre
 
-    dfall_filtree = dfall.drop(dfall[dfall.askswall == 1000 ].index)
-    print(dfall_filtree)
+#filtreAsksWall
+def filtreAsksWall(dfasks):
+    dfasks_filtre = dfasks.drop(dfasks[dfasks.askswall == 1000].index)
+    return dfasks_filtre
 
-    dfall.to_json("data_treated.json",orient = 'table',index = False)
+[dfbids,dfasks] = dataquisition("data_poloniex.json")
+[askstotal,bidstotal] = calculVolumeGlobal(dfbids,dfasks)
+tendavantfiltrage = tendance(askstotal,bidstotal)
+print(tendavantfiltrage)
+
+dfasks_filtre = filtreAsksWall(dfasks)
+dfbids_filtre = filtreBidsWall(dfbids)
+[askstotal_f,bidstotal_f] = calculVolumeGlobal(dfbids_filtre,dfasks_filtre)
+tendance_f = tendance(askstotal_f,bidstotal_f)
+print(tendance_f)
+
+#concatenation de bids et asks + reindexage
+dfall = pd.concat([dfbids,dfasks],ignore_index=True,sort =True)
+dfall = dfall.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
+#print(dfall)
+#suppression des walls
+
+dfall_filtree = dfall.drop(dfall[dfall.askswall == 1000 ].index)
+#print(dfall_filtree)
+
+
+
+dfall.to_json("data_treated.json",orient = 'table',index = False)
