@@ -2,7 +2,7 @@
 #construction d'une dataframe
 #rajout des colonnes volume total style somme execl
 #rajout d'une colonne detection des walls
-#enregistrement des donnees traitees dans data_treated.JSON 
+#enregistrement des donnees traitees dans data_treated.JSON
 
 import json
 import pandas as pd
@@ -30,7 +30,7 @@ with open('data_poloniex.json') as json_data:
 #calcul du volume global et detection des walls
     dfbids['bidstotalvolume'] = dfbids['bidsvolume'].cumsum(axis = 0)
     dfasks['askstotalvolume'] = dfasks['asksvolume'].cumsum(axis = 0)
-
+#le 0.1 correspond a 10% du volume global
     comparator = lambda x: 1000 if x>0.1 else 0
 
 
@@ -42,10 +42,36 @@ with open('data_poloniex.json') as json_data:
     dfbids['bidswall'] = dfbids['bidsvolume'].multiply(1/bidstotal)
     dfbids['bidswall'] = dfbids['bidswall'].apply(comparator)
 
+    #tendance
+    seuilvente = 0.40
+    seuilachat = 0.40
+    total = askstotal + bidstotal
+    tendancevente = askstotal/total
+    tendanceachat =  bidstotal/total
+
+    if (tendancevente > seuilvente):
+        tendancevente = True
+    else : tendancevente = False
+
+    if (tendanceachat > seuilachat and tendancevente !=True):
+        tendanceachat = True
+    else :
+        tendanceachat = False
+        tendancevente = False
+        tendancenondefinie = True
+
+    #print(total)
+    #print(tendancevente)
+    #print(tendanceachat)
+    #print(tendancenondefinie)
 
     #concatenation de bids et asks + reindexage
-    dfall = pd.concat([dfbids,dfasks],ignore_index=True)
+    dfall = pd.concat([dfbids,dfasks],ignore_index=True,sort =True)
     dfall = dfall.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
-    print(dfall)
+    #print(dfall)
+    #suppression des walls
+
+    dfall_filtree = dfall.drop(dfall[dfall.askswall == 1000 ].index)
+    print(dfall_filtree)
 
     dfall.to_json("data_treated.json",orient = 'table',index = False)
