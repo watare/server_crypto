@@ -7,7 +7,7 @@
 import json
 import pandas as pd
 import numpy as np
-
+#lecture du fichier JSON
 def dataquisition(data):
     with open(data) as json_data:
         data_dict = json.load(json_data)
@@ -30,7 +30,7 @@ def dataquisition(data):
         dfasks = pd.DataFrame(listasks)
         return [dfbids,dfasks]
 
-
+#calcul des volumes vente et achat
 def calculVolumeGlobal (dfbids,dfasks):
     #calcul du volume global et detection des walls
     dfbids['bidstotalvolume'] = dfbids['bidsvolume'].cumsum(axis = 0)
@@ -81,25 +81,34 @@ def filtreAsksWall(dfasks):
     dfasks_filtre = dfasks.drop(dfasks[dfasks.askswall == 1000].index)
     return dfasks_filtre
 
+################################################################################
+#algo
+
 [dfbids,dfasks] = dataquisition("data_poloniex.json")
 [askstotal,bidstotal] = calculVolumeGlobal(dfbids,dfasks)
-tendavantfiltrage = tendance(askstotal,bidstotal)
+tendavantfiltrage = tendance(askstotal,bidstotal,55,55)
 print(tendavantfiltrage)
 
+#filtrage
 dfasks_filtre = filtreAsksWall(dfasks)
 dfbids_filtre = filtreBidsWall(dfbids)
 [askstotal_f,bidstotal_f] = calculVolumeGlobal(dfbids_filtre,dfasks_filtre)
-tendance_f = tendance(askstotal_f,bidstotal_f)
+tendance_f = tendance(askstotal_f,bidstotal_f,55,55)
 print(tendance_f)
+
+#fichier de sortie
 
 #concatenation de bids et asks + reindexage
 dfall = pd.concat([dfbids,dfasks],ignore_index=True,sort =True)
 dfall = dfall.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
-#print(dfall)
+
+dfall_filtered = pd.concat([dfbids_filtre,dfasks_filtre],ignore_index=True,sort =True)
+dfall_filtered = dfall_filtered.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
 #suppression des walls
 
-dfall_filtree = dfall.drop(dfall[dfall.askswall == 1000 ].index)
-#print(dfall_filtree)
+
+
+dfall_filtered.to_json("data_treated_filtered.json",orient = 'table',index = False)
 
 
 
