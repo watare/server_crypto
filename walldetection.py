@@ -7,6 +7,10 @@
 import json
 import pandas as pd
 import numpy as np
+
+################################################################################
+                                #fonctions
+################################################################################
 #lecture du fichier JSON
 def dataquisition(data):
     with open(data) as json_data:
@@ -47,10 +51,10 @@ def calculVolumeGlobal (dfbids,dfasks):
     dfbids['bidswall'] = dfbids['bidsvolume'].multiply(1/bidstotal)
     dfbids['bidswall'] = dfbids['bidswall'].apply(comparator)
 
-    return [askstotal, bidstotal]
+    return [bidstotal, askstotal]
 #tendance
     #achat/vente/nondefini
-def tendance (askstotal,bidstotal,seuilvente = 50,seuilachat = 50):
+def tendance (bidstotal,askstotal,seuilvente = 50,seuilachat = 50):
     total = askstotal + bidstotal
     pourcentagevente = int(askstotal/total*100)
     pourcentageachat =  int(bidstotal/total*100)
@@ -69,31 +73,37 @@ def tendance (askstotal,bidstotal,seuilvente = 50,seuilachat = 50):
         tendancevente = False
         tendancenondefinie = False
 
-    return [tendanceachat,tendancevente,tendancenondefinie]
+    return [tendancevente,tendanceachat,tendancenondefinie]
 
-#filtreBidsWall
-def filtreBidsWall(dfbids):
-    dfbids_filtre = dfbids.drop(dfbids[dfbids.bidswall == 1000].index)
-    return dfbids_filtre
-
-#filtreAsksWall
-def filtreAsksWall(dfasks):
-    dfasks_filtre = dfasks.drop(dfasks[dfasks.askswall == 1000].index)
-    return dfasks_filtre
+#filtreWall
+def filtreWall(df,type):
+    if (type == "bids"):
+        dfbids_filtre = df.drop(df[df.bidswall == 1000].index)
+        return dfbids_filtre
+    if (type == "asks"):
+        dfasks_filtre = df.drop(df[df.askswall == 1000].index)
+        return dfasks_filtre
+    else : print("erreur")
 
 ################################################################################
-#algo
+                                #test
+################################################################################
+
+
+################################################################################
+                                #programme
+################################################################################
 
 [dfbids,dfasks] = dataquisition("data_poloniex.json")
 [askstotal,bidstotal] = calculVolumeGlobal(dfbids,dfasks)
-tendavantfiltrage = tendance(askstotal,bidstotal,55,55)
+tendavantfiltrage = tendance(bidstotal,askstotal,55,55)
 print(tendavantfiltrage)
 
 #filtrage
-dfasks_filtre = filtreAsksWall(dfasks)
-dfbids_filtre = filtreBidsWall(dfbids)
+dfasks_filtre = filtreWall(dfasks,"asks")
+dfbids_filtre = filtreWall(dfbids,"bids")
 [askstotal_f,bidstotal_f] = calculVolumeGlobal(dfbids_filtre,dfasks_filtre)
-tendance_f = tendance(askstotal_f,bidstotal_f,55,55)
+tendance_f = tendance(bidstotal_f,askstotal_f,55,55)
 print(tendance_f)
 
 #fichier de sortie
@@ -108,8 +118,8 @@ dfall_filtered = dfall_filtered.sort_values(by=['value']).reset_index(drop = Tru
 
 
 
-dfall_filtered.to_json("data_treated_filtered.json",orient = 'table',index = False)
+dfall_filtered.to_json("../my-app/src/assets/data_treated_filtered.json",orient = 'table',index = False)
 
 
 
-dfall.to_json("data_treated.json",orient = 'table',index = False)
+dfall.to_json("../my-app/src/assets/data_treated.json",orient = 'table',index = False)
