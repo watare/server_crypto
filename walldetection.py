@@ -55,25 +55,21 @@ def calculVolumeGlobal (dfbids,dfasks):
 #tendance
     #achat/vente/nondefini
 def tendance (bidstotal,askstotal,seuilvente = 50,seuilachat = 50):
+    TACHAT = 1
+    TVENTE = 2
+    TUNDEFINED = 3
     total = askstotal + bidstotal
     pourcentagevente = int(askstotal/total*100)
     pourcentageachat =  int(bidstotal/total*100)
 
-    tendanceachat = False
-    tendancevente = False
-    tendancenondefinie = True
+    _tendance = TUNDEFINED
 
     if pourcentagevente  > seuilvente :
-        tendancevente = True
-        tendanceachat = False
-        tendancenondefinie = False
+        _tendance = TVENTE
+    if pourcentageachat > seuilachat and _tendance != TVENTE:
+        _tendance = TACHAT
 
-    if pourcentageachat > seuilachat and tendancevente == False:
-        tendanceachat = True
-        tendancevente = False
-        tendancenondefinie = False
-
-    return [tendancevente,tendanceachat,tendancenondefinie]
+    return _tendance
 
 #filtreWall
 def filtreWall(df,type):
@@ -85,27 +81,60 @@ def filtreWall(df,type):
         return dfasks_filtre
     else : print("erreur")
 
-################################################################################
-                                #test
-################################################################################
+#placement_ordre
+def placement_ordre(tendance,dfbids,dfasks):
+    TACHAT = 1
+    TVENTE = 2
+    TUNDEFINED = 3
 
+    def fAchat():
+        dwall = dfbids.drop(dfbids[dfbids.bidswall != 1000].index)
+        dwall = dwall.sort_values(by = 'value')
+        #print dwall
+        dwall = dwall["value"].iloc[-1]
+        return dwall
+
+    def fVente():
+        dwall = dfasks.drop(dfbids[dfasks.askswall != 1000].index)
+        dwall = dwall.sort_values(by = 'value')
+        dwall = dwall["value"].iloc[0]
+        return dwall
+
+
+    def fRien():
+        return -1
+
+    switcher={
+        TVENTE: fVente,
+        TACHAT: fAchat,
+        TUNDEFINED: fRien
+        }
+    func = switcher.get(tendance, lambda: "argumentinvalide")
+    return float(func())
 
 ################################################################################
                                 #programme
 ################################################################################
 
+#aquisition des donnees
 [dfbids,dfasks] = dataquisition("data_poloniex.json")
+#ajout des wall
 [askstotal,bidstotal] = calculVolumeGlobal(dfbids,dfasks)
-tendavantfiltrage = tendance(bidstotal,askstotal,55,55)
-print(tendavantfiltrage)
+#print(dfbids)
+tendavantfiltrage = tendance(bidstotal,askstotal,50,50)
+#print(tendavantfiltrage)
 
-#filtrage
+#filtrage des wall
 dfasks_filtre = filtreWall(dfasks,"asks")
 dfbids_filtre = filtreWall(dfbids,"bids")
+#tendance
 [askstotal_f,bidstotal_f] = calculVolumeGlobal(dfbids_filtre,dfasks_filtre)
-tendance_f = tendance(bidstotal_f,askstotal_f,55,55)
-print(tendance_f)
+tendance_f = tendance(bidstotal_f,askstotal_f,50,50)
 
+
+placement_ordre(tendavantfiltrage,dfbids,dfasks)
+#print dfbids
+#print(tendavantfiltrage)
 #fichier de sortie
 
 #concatenation de bids et asks + reindexage

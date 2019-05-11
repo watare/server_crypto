@@ -17,11 +17,24 @@ class MyFirstTests(unittest.TestCase):
 
     def test_tendance(self):
         data_volume = calculVolumeGlobal (self.data[0],self.data[1])
-        toto = tendance (data_volume[0],data_volume[1])
-        self.assertEqual(toto[0] ^ toto[1] ^ toto[2],True)
+        _tendance = tendance (data_volume[0],data_volume[1])
+
+        self.assertEqual(_tendance in [1,2,3],True)
 
     def test_filtreWall(self):
-        
+        pass
+
+    def test_placement_ordre(self):
+        #aquisition des donnees
+        [dfb,dfa] = dataquisition("data_poloniex.json")
+        #ajout des wall
+        [atotal,btotal] = calculVolumeGlobal(dfb,dfa)
+
+        _tendance = tendance(bidstotal,askstotal,50,50)
+
+        [atotal,btotal] = calculVolumeGlobal(dfb,dfa)
+        for _tendance in [1,2,3]:
+            self.assertEqual( type(placement_ordre(_tendance,dfb,dfa)) == float,True)
 
 if __name__ == '__main__':
     unittest.main()
