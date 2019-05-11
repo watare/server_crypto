@@ -92,17 +92,17 @@ def placement_ordre(tendance,dfbids,dfasks):
         dwall = dwall.sort_values(by = 'value')
         #print dwall
         dwall = dwall["value"].iloc[-1]
-        return dwall
+        return ["bid",float(dwall)+0.00000001]
 
     def fVente():
         dwall = dfasks.drop(dfbids[dfasks.askswall != 1000].index)
         dwall = dwall.sort_values(by = 'value')
         dwall = dwall["value"].iloc[0]
-        return dwall
+        return ["ask",float(dwall)-0.00000001]
 
 
     def fRien():
-        return -1
+        return ["undefined",-1.0]
 
     switcher={
         TVENTE: fVente,
@@ -110,7 +110,7 @@ def placement_ordre(tendance,dfbids,dfasks):
         TUNDEFINED: fRien
         }
     func = switcher.get(tendance, lambda: "argumentinvalide")
-    return float(func())
+    return func()
 
 ################################################################################
                                 #programme
@@ -131,11 +131,13 @@ dfbids_filtre = filtreWall(dfbids,"bids")
 [askstotal_f,bidstotal_f] = calculVolumeGlobal(dfbids_filtre,dfasks_filtre)
 tendance_f = tendance(bidstotal_f,askstotal_f,50,50)
 
-
+#renvoi un tuple contenant l'action a executer (vendre/acheter/rien)
+#ainsi que prix a rentrer
 placement_ordre(tendavantfiltrage,dfbids,dfasks)
-#print dfbids
-#print(tendavantfiltrage)
-#fichier de sortie
+
+################################################################################
+#Affichage des donnees
+################################################################################
 
 #concatenation de bids et asks + reindexage
 dfall = pd.concat([dfbids,dfasks],ignore_index=True,sort =True)

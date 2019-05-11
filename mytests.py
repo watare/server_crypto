@@ -34,7 +34,7 @@ class MyFirstTests(unittest.TestCase):
 
         [atotal,btotal] = calculVolumeGlobal(dfb,dfa)
         for _tendance in [1,2,3]:
-            self.assertEqual( type(placement_ordre(_tendance,dfb,dfa)) == float,True)
+            self.assertEqual( type(placement_ordre(_tendance,dfb,dfa)[1]) == float,True)
 
 if __name__ == '__main__':
     unittest.main()
