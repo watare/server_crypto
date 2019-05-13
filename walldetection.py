@@ -151,8 +151,8 @@ dfall_filtered = dfall_filtered.sort_values(by=['value']).reset_index(drop = Tru
 
 
 
-dfall_filtered.to_json("../my-app/src/assets/data_treated_filtered.json",orient = 'table',index = False)
+dfall_filtered.to_json(homedir+"/my-app/src/assets/data_treated_filtered.json",orient = 'table',index = False)
 
 
 
-dfall.to_json("../my-app/src/assets/data_treated.json",orient = 'table',index = False)
+dfall.to_json(homedir+"/my-app/src/assets/data_treated.json",orient = 'table',index = False)
