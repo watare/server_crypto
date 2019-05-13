@@ -8,6 +8,8 @@ import json
 import pandas as pd
 import numpy as np
 
+import os.path
+homedir = os.path.expanduser("~")
 ################################################################################
                                 #fonctions
 ################################################################################
@@ -25,9 +27,9 @@ def dataquisition(data):
 
         #transformation en dictionnaire
         for bid in bids :
-            listbids.append({'value' : bid[0], 'bidsvolume' :bid[1]})
+            listbids.append({'value' : float(bid[0]), 'bidsvolume' :float(bid[1])})
         for ask in asks :
-            listasks.append({'value' : ask[0], 'asksvolume' :ask[1]})
+            listasks.append({'value' : float(ask[0]), 'asksvolume' :float(ask[1])})
 
         #ajout de la liste de dicitonnaire dans les dataframes
         dfbids = pd.DataFrame(listbids)
@@ -117,7 +119,7 @@ def placement_ordre(tendance,dfbids,dfasks):
 ################################################################################
 
 #aquisition des donnees
-[dfbids,dfasks] = dataquisition("data_poloniex.json")
+[dfbids,dfasks] = dataquisition(homedir+"/server_crypto/data_received_gdax.json")
 #ajout des wall
 [askstotal,bidstotal] = calculVolumeGlobal(dfbids,dfasks)
 #print(dfbids)
