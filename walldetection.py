@@ -24,7 +24,7 @@ def dataquisition(data):
 
         listbids = []
         listasks = []
-
+        json_data.close()
         #transformation en dictionnaire
         for bid in bids :
             listbids.append({'value' : float(bid[0]), 'bidsvolume' :float(bid[1])})
@@ -134,11 +134,35 @@ if __name__ == '__main__':
     [askstotal_f,bidstotal_f] = calculVolumeGlobal(dfbids_filtre,dfasks_filtre)
     tendance_f = tendance(bidstotal_f,askstotal_f,50,50)
 
-    #renvoi un tuple contenant l'action a executer (vendre/acheter/rien)
+    #renvoi un tuple contenant l'action a executer (vendrvalorisation.pye/acheter/rien)
     #ainsi que prix a rentrer
-    placement_ordre(tendavantfiltrage,dfbids,dfasks)
 
+    [_tendance, _prix] = placement_ordre(tendavantfiltrage,dfbids,dfasks)
+
+    ##################################################################################
+    #sauvegarde de l'algo
+
+    import datetime
+    exists = os.path.isfile(homedir +'/server_crypto/algosignal.json')
+    def dataAlgo():
+        if exists:
+            with open(homedir +'/server_crypto/algosignal.json', 'r') as json_algo:
+                algosignal = json.load(json_algo)
+                algosignal["algosignal"].append({"tendance":"asks","prix":"50","date":"10 day, 19:00:00"})
+                json_algo.close()
+            with open(homedir +'/server_crypto/algosignal.json', 'w') as json_algo:
+                json.dump(algosignal, json_algo)
+                json_algo.close()
+                #ajouter un element au fichier avec la date  la tendnace et le prix
+        else:
+            with open(homedir +'/server_crypto/algosignal.json', 'w') as json_algo:
+                algosignal = {"algosignal":[{"tendance":"bids","prix":"20","date":"11 day, 19:00:00"}]}
+                json.dump(algosignal, json_algo)
+                json_algo.close()
+    def valo(_prix,cagnotte,valorisation,):
+        pass
     ################################################################################
+    dataAlgo()
     #Affichage des donnees
     ################################################################################
 
