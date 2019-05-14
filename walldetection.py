@@ -17,14 +17,14 @@ homedir = os.path.expanduser("~")
 def dataquisition(data):
     with open(data) as json_data:
         data_dict = json.load(json_data)
-
+        json_data.close()
     #transformation JSON en 2 dataframe
         bids = data_dict['bids']
         asks = data_dict['asks']
 
         listbids = []
         listasks = []
-        json_data.close()
+
         #transformation en dictionnaire
         for bid in bids :
             listbids.append({'value' : float(bid[0]), 'bidsvolume' :float(bid[1])})
@@ -143,12 +143,15 @@ if __name__ == '__main__':
     #sauvegarde de l'algo
 
     import datetime
+    now = datetime.datetime.now()
+    date = now.strftime("%c")
+
     exists = os.path.isfile(homedir +'/server_crypto/algosignal.json')
-    def dataAlgo():
+    def dataAlgo(_tendance,_prix):
         if exists:
             with open(homedir +'/server_crypto/algosignal.json', 'r') as json_algo:
                 algosignal = json.load(json_algo)
-                algosignal["algosignal"].append({"tendance":"asks","prix":"50","date":"10 day, 19:00:00"})
+                algosignal["algosignal"].append({"tendance":_tendance,"prix":_prix,"date":date})
                 json_algo.close()
             with open(homedir +'/server_crypto/algosignal.json', 'w') as json_algo:
                 json.dump(algosignal, json_algo)
@@ -156,13 +159,14 @@ if __name__ == '__main__':
                 #ajouter un element au fichier avec la date  la tendnace et le prix
         else:
             with open(homedir +'/server_crypto/algosignal.json', 'w') as json_algo:
-                algosignal = {"algosignal":[{"tendance":"bids","prix":"20","date":"11 day, 19:00:00"}]}
+                algosignal = {"algosignal":[{"tendance":_tendance,"prix":_prix,"date":date}]}
                 json.dump(algosignal, json_algo)
                 json_algo.close()
+                
     def valo(_prix,cagnotte,valorisation,):
         pass
     ################################################################################
-    dataAlgo()
+    dataAlgo(_tendance,_prix)
     #Affichage des donnees
     ################################################################################
 
