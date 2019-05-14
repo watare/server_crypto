@@ -7,7 +7,7 @@
 import json
 import pandas as pd
 import numpy as np
-
+import sys
 import os.path
 homedir = os.path.expanduser("~")
 ################################################################################
@@ -117,42 +117,44 @@ def placement_ordre(tendance,dfbids,dfasks):
 ################################################################################
                                 #programme
 ################################################################################
+if __name__ == '__main__':
 
-#aquisition des donnees
-[dfbids,dfasks] = dataquisition(homedir+"/server_crypto/data_received_gdax.json")
-#ajout des wall
-[askstotal,bidstotal] = calculVolumeGlobal(dfbids,dfasks)
-#print(dfbids)
-tendavantfiltrage = tendance(bidstotal,askstotal,50,50)
-#print(tendavantfiltrage)
+    #aquisition des donnees
+    [dfbids,dfasks] = dataquisition(homedir+"/server_crypto/data_received_gdax.json")
+    #ajout des wall
+    [askstotal,bidstotal] = calculVolumeGlobal(dfbids,dfasks)
+    #print(dfbids)
+    tendavantfiltrage = tendance(bidstotal,askstotal,50,50)
+    #print(tendavantfiltrage)
 
-#filtrage des wall
-dfasks_filtre = filtreWall(dfasks,"asks")
-dfbids_filtre = filtreWall(dfbids,"bids")
-#tendance
-[askstotal_f,bidstotal_f] = calculVolumeGlobal(dfbids_filtre,dfasks_filtre)
-tendance_f = tendance(bidstotal_f,askstotal_f,50,50)
+    #filtrage des wall
+    dfasks_filtre = filtreWall(dfasks,"asks")
+    dfbids_filtre = filtreWall(dfbids,"bids")
+    #tendance
+    [askstotal_f,bidstotal_f] = calculVolumeGlobal(dfbids_filtre,dfasks_filtre)
+    tendance_f = tendance(bidstotal_f,askstotal_f,50,50)
 
-#renvoi un tuple contenant l'action a executer (vendre/acheter/rien)
-#ainsi que prix a rentrer
-placement_ordre(tendavantfiltrage,dfbids,dfasks)
+    #renvoi un tuple contenant l'action a executer (vendre/acheter/rien)
+    #ainsi que prix a rentrer
+    placement_ordre(tendavantfiltrage,dfbids,dfasks)
 
-################################################################################
-#Affichage des donnees
-################################################################################
+    ################################################################################
+    #Affichage des donnees
+    ################################################################################
 
-#concatenation de bids et asks + reindexage
-dfall = pd.concat([dfbids,dfasks],ignore_index=True,sort =True)
-dfall = dfall.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
+    #concatenation de bids et asks + reindexage
+    dfall = pd.concat([dfbids,dfasks],ignore_index=True,sort =True)
+    dfall = dfall.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
 
-dfall_filtered = pd.concat([dfbids_filtre,dfasks_filtre],ignore_index=True,sort =True)
-dfall_filtered = dfall_filtered.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
-#suppression des walls
-
-
-
-dfall_filtered.to_json(homedir+"/my-app/src/assets/data_treated_filtered.json",orient = 'table',index = False)
+    dfall_filtered = pd.concat([dfbids_filtre,dfasks_filtre],ignore_index=True,sort =True)
+    dfall_filtered = dfall_filtered.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
+    #suppression des walls
 
 
 
-dfall.to_json(homedir+"/my-app/src/assets/data_treated.json",orient = 'table',index = False)
+    dfall_filtered.to_json(homedir+"/my-app/src/assets/data_treated_filtered.json",orient = 'table',index = False)
+
+    dfall.to_json(homedir+"/my-app/src/assets/data_treated.json",orient = 'table',index = False)
+
+
+    sys.exit()

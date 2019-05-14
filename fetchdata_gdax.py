@@ -1,6 +1,6 @@
 import cbpro
 import json
-
+import sys
 import os.path
 homedir = os.path.expanduser("~")
 
@@ -14,3 +14,4 @@ def fetchdata():
 
 if __name__ == '__main__':
     fetchdata()
+    sys.exit()
