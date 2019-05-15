@@ -56,7 +56,7 @@ def calculVolumeGlobal (dfbids,dfasks):
     return [bidstotal, askstotal]
 #tendance
     #achat/vente/nondefini
-def tendance (bidstotal,askstotal,seuilvente = 50,seuilachat = 50):
+def tendance (bidstotal,askstotal,seuilvente = 51,seuilachat = 51):
     TACHAT = 1
     TVENTE = 2
     TUNDEFINED = 3
@@ -142,31 +142,49 @@ if __name__ == '__main__':
     ##################################################################################
     #sauvegarde de l'algo
 
-    import datetime
-    now = datetime.datetime.now()
-    date = now.strftime("%c")
+    import time
+    now = int(time.time())
+    date = now-now%60
 
     exists = os.path.isfile(homedir +'/server_crypto/algosignal.json')
     def dataAlgo(_tendance,_prix):
         if exists:
             with open(homedir +'/server_crypto/algosignal.json', 'r') as json_algo:
-                algosignal = json.load(json_algo)
-                algosignal["algosignal"].append({"tendance":_tendance,"prix":_prix,"date":date})
-                json_algo.close()
-            with open(homedir +'/server_crypto/algosignal.json', 'w') as json_algo:
-                json.dump(algosignal, json_algo)
-                json_algo.close()
-                #ajouter un element au fichier avec la date  la tendnace et le prix
+                    algosignal = json.load(json_algo)
+                    algosignal["algosignal"].append({"tendance":_tendance,"prix":_prix,"date":date})
+                    json_algo.close()
+                    with open(homedir +'/server_crypto/algosignal.json', 'w') as json_algo:
+                        json.dump(algosignal, json_algo)
+                        json_algo.close()
+                        #ajouter un element au fichier avec la date  la tendnace et le prix
         else:
             with open(homedir +'/server_crypto/algosignal.json', 'w') as json_algo:
                 algosignal = {"algosignal":[{"tendance":_tendance,"prix":_prix,"date":date}]}
                 json.dump(algosignal, json_algo)
                 json_algo.close()
-                
-    def valo(_prix,cagnotte,valorisation,):
-        pass
+
+    def mergetlohcv():
+        dates =[]
+        match_tlohcv=[]
+        with open(homedir +'/server_crypto/algosignal.json', 'r') as data_lohcv:
+            _signal = json.load(data_lohcv)
+            for date in _signal["algosignal"]:
+                dates.append(date['date'])
+            with open(homedir +'/server_crypto/data_received_tlohcv.json', 'r') as data_lo:
+                tlohc = json.load(data_lo)
+                for ele in tlohc:
+                    if ele["time"] in dates:
+                        match_tlohcv.append(ele)
+                data_lo.close()
+            data_lohcv.close()
+            with open(homedir +'/server_crypto/algosignal.json', 'w') as data_l:
+                _signal["tlohcv"] = match_tlohcv
+                print match_tlohcv
+                json.dump(_signal,data_l)
+
     ################################################################################
     dataAlgo(_tendance,_prix)
+    mergetlohcv()
     #Affichage des donnees
     ################################################################################
 
