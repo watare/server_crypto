@@ -120,7 +120,7 @@ def placement_ordre(tendance,dfbids,dfasks):
 if __name__ == '__main__':
 
     #aquisition des donnees
-    [dfbids,dfasks] = dataquisition(homedir+"/server_crypto/data_received_gdax.json")
+    [dfbids,dfasks] = dataquisition(homedir+"/server_crypto/data/data_received_gdax.json")
     #ajout des wall
     [askstotal,bidstotal] = calculVolumeGlobal(dfbids,dfasks)
     #print(dfbids)
@@ -146,19 +146,19 @@ if __name__ == '__main__':
     now = int(time.time())
     date = now-now%60
 
-    exists = os.path.isfile(homedir +'/server_crypto/algosignal.json')
+    exists = os.path.isfile(homedir +'/server_crypto/data/algosignal.json')
     def dataAlgo(_tendance,_prix):
         if exists:
-            with open(homedir +'/server_crypto/algosignal.json', 'r') as json_algo:
+            with open(homedir +'/server_crypto/data/algosignal.json', 'r') as json_algo:
                     algosignal = json.load(json_algo)
                     algosignal["algosignal"].append({"tendance":_tendance,"prix":_prix,"date":date})
                     json_algo.close()
-                    with open(homedir +'/server_crypto/algosignal.json', 'w') as json_algo:
+                    with open(homedir +'/server_crypto/data/algosignal.json', 'w') as json_algo:
                         json.dump(algosignal, json_algo)
                         json_algo.close()
                         #ajouter un element au fichier avec la date  la tendnace et le prix
         else:
-            with open(homedir +'/server_crypto/algosignal.json', 'w') as json_algo:
+            with open(homedir +'/server_crypto/data/algosignal.json', 'w') as json_algo:
                 algosignal = {"algosignal":[{"tendance":_tendance,"prix":_prix,"date":date}]}
                 json.dump(algosignal, json_algo)
                 json_algo.close()
@@ -166,18 +166,18 @@ if __name__ == '__main__':
     def mergetlohcv():
         dates =[]
         match_tlohcv=[]
-        with open(homedir +'/server_crypto/algosignal.json', 'r') as data_lohcv:
+        with open(homedir +'/server_crypto/data/algosignal.json', 'r') as data_lohcv:
             _signal = json.load(data_lohcv)
             for date in _signal["algosignal"]:
                 dates.append(date['date'])
-            with open(homedir +'/server_crypto/data_received_tlohcv.json', 'r') as data_lo:
+            with open(homedir +'/server_crypto/data/data_received_tlohcv.json', 'r') as data_lo:
                 tlohc = json.load(data_lo)
                 for ele in tlohc:
                     if ele["time"] in dates:
                         match_tlohcv.append(ele)
                 data_lo.close()
             data_lohcv.close()
-            with open(homedir +'/server_crypto/algosignal.json', 'w') as data_l:
+            with open(homedir +'/server_crypto/data/algosignal.json', 'w') as data_l:
                 _signal["tlohcv"] = match_tlohcv
                 print match_tlohcv
                 json.dump(_signal,data_l)
@@ -189,10 +189,10 @@ if __name__ == '__main__':
     ################################################################################
 
     #concatenation de bids et asks + reindexage
-    dfall = pd.concat([dfbids,dfasks],ignore_index=True,sort =True)
+    dfall = pd.concat([dfbids,dfasks],ignore_index=True)
     dfall = dfall.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
 
-    dfall_filtered = pd.concat([dfbids_filtre,dfasks_filtre],ignore_index=True,sort =True)
+    dfall_filtered = pd.concat([dfbids_filtre,dfasks_filtre],ignore_index=True,)
     dfall_filtered = dfall_filtered.sort_values(by=['value']).reset_index(drop = True).replace(0,value = np.nan)
     #suppression des walls
 

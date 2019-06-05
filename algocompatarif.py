@@ -10,7 +10,7 @@ montantdisponible = 50.0
 valorisation = 0.0
 donothing = 100.00/7000
 
-with open(homedir + "/server_crypto/algosignal.json") as json_data:
+with open(homedir + "/server_crypto/data/algosignal.json") as json_data:
     data_dict = json.load(json_data)
     json_data.close()
 #transformation JSON en 2 dataframe

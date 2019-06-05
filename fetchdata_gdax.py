@@ -7,7 +7,7 @@ homedir = os.path.expanduser("~")
 def fetchdata():
     #reception des donnees orderbook gdax et stockage dans un fichier
     public_client = cbpro.PublicClient()
-    with open(homedir +'/server_crypto/data_received_gdax.json', 'w') as f:
+    with open(homedir +'/server_crypto/data/data_received_gdax.json', 'w') as f:
         data = public_client.get_product_order_book('BTC-EUR', level=2)
         data = json.dumps(data)
         f.write(data)
@@ -19,7 +19,7 @@ def fetchdata():
         da[0] = da[0] - da[0]%60
         listdata.append({'time' :da[0], 'open' :da[1],'high':da[2],'low':da[3],'close':da[4],'volume':da[5]})
 
-    with open(homedir +'/server_crypto/data_received_tlohcv.json', 'w') as f:
+    with open(homedir +'/server_crypto/data/data_received_tlohcv.json', 'w') as f:
         json.dump(listdata,f)
         f.close()
 
