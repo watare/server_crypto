@@ -198,9 +198,9 @@ if __name__ == '__main__':
 
 
 
-    dfall_filtered.to_json(homedir+"/my-app/src/assets/data_treated_filtered.json",orient = 'table',index = False)
+    #dfall_filtered.to_json(homedir+"/my-app/src/assets/data_treated_filtered.json",orient = 'table',index = False)
 
-    dfall.to_json(homedir+"/my-app/src/assets/data_treated.json",orient = 'table',index = False)
+    #dfall.to_json(homedir+"/my-app/src/assets/data_treated.json",orient = 'table',index = False)
 
 
     sys.exit()

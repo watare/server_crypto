@@ -13,7 +13,7 @@ def fetchdata():
         f.write(data)
         f.close()
 
-    data = public_client.get_product_historic_rates('BTC-EUR', granularity=60)
+    data = public_client.get_product_historic_rates('BTC-EUR', granularity=60,start = "2019-05-15")
     listdata = []
     for da in data:
         da[0] = da[0] - da[0]%60

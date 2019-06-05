@@ -1,0 +1,1 @@
+* * * * * /usr/bin/python /root/server_crypto/fetchdata_gdax.py && /usr/bin/python /root/server_crypto/walldetection.py && /usr/bin/python /root/server_crypto/algocomparatif.py

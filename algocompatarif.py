@@ -60,4 +60,4 @@ with open(homedir + "/server_crypto/algosignal.json") as json_data:
 
     print(dfalgotlohcv)
 
-    dfalgotlohcv.to_json(homedir+"/my-app/src/assets/algotlohcv.json",orient = 'table',index = False)#print(dftlohcv.head())
+    #dfalgotlohcv.to_json(homedir+"/my-app/src/assets/algotlohcv.json",orient = 'table',index = False)#print(dftlohcv.head())
