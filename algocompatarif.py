@@ -5,8 +5,8 @@ import sys
 import os.path
 
 homedir = os.path.expanduser("~")
-montantinvesti = 50.000000000/7000.0000000000
-montantdisponible = 50.0
+montantinvesti = 100.000000000/7000.0000000000
+montantdisponible = 0
 valorisation = 0.0
 donothing = 100.00/7000
 
@@ -51,13 +51,27 @@ with open(homedir + "/server_crypto/data/algosignal.json") as json_data:
 
         return [montantdisponible,montantinvesti,valorisation]
 
-    data = dfalgotlohcv["close"].iloc[0]
+    #data = dfalgotlohcv["close"].iloc[0]
     #print(1/data)
-    dfalgotlohcv["montantdisponible"]= dfalgotlohcv.apply(lambda x: compare(x.prix,x.tendance,x.close)[0], axis=1)
-    dfalgotlohcv["montantinvesti"]= dfalgotlohcv.apply(lambda x: compare(x.prix,x.tendance,x.close)[1], axis=1)
-    dfalgotlohcv["valorisation"]= dfalgotlohcv.apply(lambda x: compare(x.prix,x.tendance,x.close)[2], axis=1)
-    dfalgotlohcv["sans_opti"]=dfalgotlohcv.apply(lambda x :x.close*100.0/7000.0,axis=1)
+    #dfalgotlohcv["montantdisponible"]= dfalgotlohcv.apply(lambda x: compare(x.prix,x.tendance,x.close)[0], axis=1)
+    #dfalgotlohcv["montantinvesti"]= dfalgotlohcv.apply(lambda x: compare(x.prix,x.tendance,x.close)[1], axis=1)
+    #dfalgotlohcv["valorisation"]= dfalgotlohcv.apply(lambda x: compare(x.prix,x.tendance,x.close)[2], axis=1)
 
+
+    df_resultat = pd.DataFrame(columns = ["montantdisponible","montantinvesti","valorisation"])
+    data_list =[]
+    #inversion des lignes pour que l'algo parte bien du montantinvesti original
+    dfalgotlohcv_r = dfalgotlohcv.iloc[::-1]
+    for row in dfalgotlohcv_r.iterrows():
+        resultat = compare(row[1].prix,row[1].tendance,row[1].close)
+        #insertion de du resultat au debut pour reinverser le resultat
+        data_list.insert(0,{"montantdisponible":resultat[0],"montantinvesti":resultat[1],"valorisation":resultat[2]})
+        #print(row[1].prix)
+    df2_resultat = df_resultat.append(data_list)
+
+    dfalgotlohcv["montantdisponible"] = df2_resultat["montantdisponible"]
+    dfalgotlohcv["montantinvesti"] = df2_resultat["montantinvesti"]
+    dfalgotlohcv["valorisation"] = df2_resultat["valorisation"]
+    dfalgotlohcv["sans_opti"]=dfalgotlohcv.apply(lambda x :x.close*donothing,axis=1)
     print(dfalgotlohcv)
-
     #dfalgotlohcv.to_json(homedir+"/my-app/src/assets/algotlohcv.json",orient = 'table',index = False)#print(dftlohcv.head())
